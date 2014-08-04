@@ -20,9 +20,17 @@ enum country_code_type_t {
 }; 
 
 int rtw_regd_init(_adapter *padapter,
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0))
+	void (*reg_notifier)(struct wiphy *wiphy,
+#else
 	int (*reg_notifier)(struct wiphy *wiphy,
+#endif
 		struct regulatory_request *request));
-int rtw_reg_notifier(struct wiphy *wiphy, struct regulatory_request *request);
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0))
+void rtw_reg_notifier(struct wiphy *wiphy, struct regulatory_request *request);
+#else
+int rtw_reg_notifier(struct wiphy *wiphy, struct regulatory_request *request);
+#endif
 
 #endif

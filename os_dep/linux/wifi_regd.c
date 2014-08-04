@@ -161,11 +161,16 @@ static void _rtw_reg_apply_beaconing_flags(struct wiphy *wiphy,
 			    (ch->flags & IEEE80211_CHAN_RADAR))
 				continue;
 			if (initiator == NL80211_REGDOM_SET_BY_COUNTRY_IE) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0))
+				reg_rule = freq_reg_info(wiphy, ch->center_freq);
+				if (IS_ERR(reg_rule))
+					continue;
+#else
 				r = freq_reg_info(wiphy, ch->center_freq,
 						  bandwidth, &reg_rule);
 				if (r)
 					continue;
-
+#endif
 				/*
 				 *If 11d had a rule for this channel ensure
 				 *we enable adhoc/beaconing if it allows us to
@@ -228,16 +233,26 @@ static void _rtw_reg_apply_active_scan_flags(struct wiphy *wiphy,
 	 */
 
 	ch = &sband->channels[11];	/* CH 12 */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0))
+	reg_rule = freq_reg_info(wiphy, ch->center_freq);
+	if (!IS_ERR(reg_rule)) {
+#else
 	r = freq_reg_info(wiphy, ch->center_freq, bandwidth, &reg_rule);
 	if (!r) {
+#endif
 		if (!(reg_rule->flags & NL80211_RRF_PASSIVE_SCAN))
 			if (ch->flags & IEEE80211_CHAN_PASSIVE_SCAN)
 				ch->flags &= ~IEEE80211_CHAN_PASSIVE_SCAN;
 	}
 
 	ch = &sband->channels[12];	/* CH 13 */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0))
+	reg_rule = freq_reg_info(wiphy, ch->center_freq);
+	if (!IS_ERR(reg_rule)) {
+#else
 	r = freq_reg_info(wiphy, ch->center_freq, bandwidth, &reg_rule);
 	if (!r) {
+#endif
 		if (!(reg_rule->flags & NL80211_RRF_PASSIVE_SCAN))
 			if (ch->flags & IEEE80211_CHAN_PASSIVE_SCAN)
 				ch->flags &= ~IEEE80211_CHAN_PASSIVE_SCAN;
@@ -468,9 +483,12 @@ static const struct ieee80211_regdomain *_rtw_regdomain_select(struct
 
 static int _rtw_regd_init_wiphy(struct rtw_regulatory *reg,
 				struct wiphy *wiphy,
-				int (*reg_notifier) (struct wiphy * wiphy,
-						     struct regulatory_request *
-						     request))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0))
+				void (*reg_notifier) (struct wiphy * wiphy, struct regulatory_request * request)
+#else
+				int (*reg_notifier) (struct wiphy * wiphy, struct regulatory_request * request)
+#endif
+			)
 {
 	const struct ieee80211_regdomain *regd;
 
@@ -502,8 +520,12 @@ static struct country_code_to_enum_rd *_rtw_regd_find_country(u16 countrycode)
 }
 
 int rtw_regd_init(_adapter * padapter,
-		  int (*reg_notifier) (struct wiphy * wiphy,
-				       struct regulatory_request * request))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0))
+		  void (*reg_notifier) (struct wiphy * wiphy, struct regulatory_request * request)
+#else
+		  int (*reg_notifier) (struct wiphy * wiphy, struct regulatory_request * request)
+#endif
+		)
 {
 	//struct registry_priv  *registrypriv = &padapter->registrypriv;
 	struct wiphy *wiphy = padapter->rtw_wdev->wiphy;
@@ -526,7 +548,11 @@ int rtw_regd_init(_adapter * padapter,
 	return 0;
 }
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0))
+void rtw_reg_notifier(struct wiphy *wiphy, struct regulatory_request *request)
+#else
 int rtw_reg_notifier(struct wiphy *wiphy, struct regulatory_request *request)
+#endif
 {
 	struct wireless_dev *rtw_wdev = wiphy_to_wdev(wiphy);
 	struct rtw_regulatory *reg = NULL;
@@ -534,7 +560,12 @@ int rtw_reg_notifier(struct wiphy *wiphy, struct regulatory_request *request)
 
 	DBG_8192C("%s\n", __func__);
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,9,0))
+	_rtw_reg_notifier_apply(wiphy, request, reg);
+	return;
+#else
 	return _rtw_reg_notifier_apply(wiphy, request, reg);
+#endif
 }
 
 #endif //CONFIG_IOCTL_CFG80211
