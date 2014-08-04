@@ -35,22 +35,22 @@ ODM_ReadFirmware_MP_8821A_FW_AP(
 );
 
 /******************************************************************************
-*                           FW_BT.TXT
+*                           FW_NIC.TXT
 ******************************************************************************/
 
 void
-ODM_ReadFirmware_MP_8821A_FW_BT(
+ODM_ReadFirmware_MP_8821A_FW_NIC(
      IN   PDM_ODM_T    pDM_Odm,
      OUT  u1Byte       *pFirmware,
      OUT  u4Byte       *pFirmwareSize
 );
 
 /******************************************************************************
-*                           FW_NIC.TXT
+*                           FW_NIC_BT.TXT
 ******************************************************************************/
 
 void
-ODM_ReadFirmware_MP_8821A_FW_NIC(
+ODM_ReadFirmware_MP_8821A_FW_NIC_BT(
      IN   PDM_ODM_T    pDM_Odm,
      OUT  u1Byte       *pFirmware,
      OUT  u4Byte       *pFirmwareSize
