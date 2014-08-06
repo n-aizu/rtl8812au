@@ -637,7 +637,7 @@ static int rtw_ndev_notifier_call(struct notifier_block * nb, unsigned long stat
 	struct net_device *dev = ndev;
 
 #if (LINUX_VERSION_CODE>=KERNEL_VERSION(2,6,29))
-	if (dev->netdev_ops->ndo_do_ioctl != rtw_ioctl)
+	if (!dev || !(dev->netdev_ops) || dev->netdev_ops->ndo_do_ioctl != rtw_ioctl)
 #else
 	if (dev->do_ioctl != rtw_ioctl)
 #endif
